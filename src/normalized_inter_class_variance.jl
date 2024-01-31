@@ -1,0 +1,87 @@
+
+
+function SNR2NICV(snr)
+    return 1.0 ./ (1.0 .+ 1.0 ./ snr)
+end
+
+function computenicv(vals, traces)
+    groups   = values(groupbyval(vals))
+    groupExp = [vec(mean(traces[:,g],dims=2)) for g in groups]
+    return replace!(var(groupExp) ./ var(traces,dims=2), NaN=>0.0)
+end
+
+function NICV(vals, traces; uniform::Bool=false)
+    if uniform
+        if ndims(vals) == 1
+            traces = length(vals) == size(traces)[2] ? traces : transpose(traces)
+            return computenicv(vals, traces)
+        elseif ndims(vals) == 2
+            if size(vals)[1] == size(traces)[1]
+                vals, traces = transpose(vals), transpose(traces)
+            end
+            nicv = Matrix{eltype(traces)}(undef, size(traces)[1],size(vals)[1])
+            for (b,val) in enumerate(eachrow(vals))
+                print("calculating byte $b....                          ",'\r')
+                nicv[:,b] = computenicv(val, traces)
+            end
+            return nicv
+        end
+    else
+        return SNR2NICV(SNR(vals, traces))
+    end
+end
+
+
+function plotNICV(nicvs, trace; show=true, pkg="pyplot")
+    if pkg == "pyplot"
+        pyplotNICV(nicvs, trace; show)
+    end
+    return
+end
+
+function pyplotNICV(nicvs, trace; show=true)
+    if ndims(trace) == 2
+        trace = vec(mean(trace, dims=2))
+    end
+    fig, ax1 = plt.subplots(figsize=(16,9))
+    
+    # plot power trace(s)
+    ax2 = ax1.twinx()
+    lim = maximum(abs.(trace))*1.2
+    ax2.set_ylabel("Voltage (V)")
+    ax2.set_ylim(-5*lim,lim)
+    ax2.plot(trace, color="blue")
+        
+    # plot SNR
+    ax1.set_zorder(ax2.get_zorder()+1)
+    ax1.patch.set_visible(false)
+    ax1.set_xlabel("Time Sample")
+    ax1.set_ylabel("Normalized Interclass Variance")
+    ax1.set_ylim(-0.02,1.7)
+    
+    if nicvs isa Dict
+        ax1.plot([None],color="blue",label="power trace")
+        for (name,nicv) in nicvs
+            ax1.plot(nicv,label=name)
+        end
+        ax1.legend()
+    else
+        if ndims(nicvs) == 1
+            nicvs = reshape(nicvs,1,length(nicvs))
+        end
+        for nicv in eachcol(nicvs)
+            ax1.plot(nicv)
+        end
+    end
+    
+    plt.tight_layout()
+    if show
+        plt.show()
+    end
+    
+    return fig
+end
+
+
+
+
