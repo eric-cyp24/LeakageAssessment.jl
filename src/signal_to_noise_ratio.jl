@@ -1,36 +1,57 @@
 
 
-
-
-function computesnr(vals, traces)
-    #println("method with transpose")
-    groups   = values(groupbyval(vals))
-    groupExp = [vec(mean(traces[:,g],dims=2)) for g in groups]
-    groupVar = [vec( var(traces[:,g],dims=2)) for g in groups]
-    return vec(var(groupExp) ./ mean(groupVar))
+function computesnr_mthread(vals::AbstractVector, traces)
+    groups   = collect(values(groupbyval(vals)))
+    groupExp = Matrix{eltype(traces)}(undef, size(traces)[1], length(groups))
+    groupVar = Matrix{eltype(traces)}(undef, size(traces)[1], length(groups))
+    @sync Threads.@threads for i in 1:length(groups)
+        groupExp[:,i] = mean(view(traces,:,groups[i]),dims=2)
+        groupVar[:,i] =  var(view(traces,:,groups[i]),dims=2)
+    end
+    return vec(var(groupExp,dims=2) ./ mean(groupVar,dims=2))
 end
 
+function computesnr(vals::AbstractVector, traces)
+    groups   = values(groupbyval(vals))
+    groupExp = stack([vec(mean(view(traces,:,g),dims=2)) for g in groups])
+    groupVar = stack([vec( var(view(traces,:,g),dims=2)) for g in groups])
+    return vec(var(groupExp,dims=2) ./ mean(groupVar,dims=2))
+end
+
+"""
+    SNR(vals, traces)
+
+Compute signal to noise ratio.\\
+Start Julia with `\$ julia -t4` to enable multithread computation.
+"""
 function SNR(vals, traces)
     if ndims(vals) == 1
         traces = length(vals) == size(traces)[2] ? traces : transpose(traces)
-        return computesnr(vals, traces)
+        return computesnr_mthread(vals, traces)
     elseif ndims(vals) == 2
         if size(vals)[1] == size(traces)[1]
             vals, traces = transpose(vals), transpose(traces)
         elseif size(vals)[2] != size(traces)[2]
+            error("Error: IV length doesn't match traces length!!")
             return nothing
         end
         snrs = Matrix{eltype(traces)}(undef, size(traces)[1], size(vals)[1])
         for (b,val) in enumerate(eachrow(vals))
             print("calculating byte $b....                           ",'\r')
-            snrs[:,b] = computesnr(val,traces)
+            snrs[:,b] = computesnr_mthread(val,traces)
         end
         return snrs
     else
+        error("ndims(vals) is neither 1 nor 2!!")
         return nothing
     end
 end
 
+"""
+    plotSNR(snrs, trace; show=true, pkg="pyplot")
+
+Plot signal to nosie ratio.
+"""
 function plotSNR(snrs, trace; show=true, pkg="pyplot")
     if pkg == "pyplot"
         pyplotSNR(snrs, trace; show)

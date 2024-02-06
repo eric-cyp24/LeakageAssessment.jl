@@ -1,20 +1,36 @@
 
 
 function SNR2NICV(snr)
-    return 1.0 ./ (1.0 .+ 1.0 ./ snr)
+    return replace!(1.0 ./ (1.0 .+ 1.0 ./ snr), NaN=>0.0)
+end
+
+function computenicv_mthread(vals::AbstractVector, traces)
+    groups   = collect(values(groupbyval(vals)))
+    groupExp = Matrix{eltype(traces)}(undef, size(traces)[1], length(groups))
+    @sync Threads.@threads for i in 1:length(groups)
+        groupExp[:,i] = mean(view(traces,:,groups[i]),dims=2)
+    end
+    return replace!(var(groupExp,dims=2) ./ var(traces,dims=2), NaN=>0.0)
 end
 
 function computenicv(vals, traces)
     groups   = values(groupbyval(vals))
-    groupExp = [vec(mean(traces[:,g],dims=2)) for g in groups]
-    return replace!(var(groupExp) ./ var(traces,dims=2), NaN=>0.0)
+    groupExp = stack([vec(mean(view(traces,:,g),dims=2)) for g in groups])
+    return replace!(var(groupExp,dims=2) ./ var(traces,dims=2), NaN=>0.0)
 end
 
-function NICV(vals, traces; uniform::Bool=false)
+"""
+    NICV(vals, traces; uniform::Bool=true)
+
+Compute normalized inter class variance. 
+NICV assumes `vals` is uniformly distributied, if not, set `uniform=false` and calculate NICV with SNR.\\
+Start Julia with `\$ julia -t4` to enable multithread computation.
+"""
+function NICV(vals, traces; uniform::Bool=true)
     if uniform
         if ndims(vals) == 1
             traces = length(vals) == size(traces)[2] ? traces : transpose(traces)
-            return computenicv(vals, traces)
+            return computenicv_mthread(vals, traces)
         elseif ndims(vals) == 2
             if size(vals)[1] == size(traces)[1]
                 vals, traces = transpose(vals), transpose(traces)
@@ -22,7 +38,7 @@ function NICV(vals, traces; uniform::Bool=false)
             nicv = Matrix{eltype(traces)}(undef, size(traces)[1],size(vals)[1])
             for (b,val) in enumerate(eachrow(vals))
                 print("calculating byte $b....                          ",'\r')
-                nicv[:,b] = computenicv(val, traces)
+                nicv[:,b] = computenicv_mthread(val, traces)
             end
             return nicv
         end
@@ -31,7 +47,11 @@ function NICV(vals, traces; uniform::Bool=false)
     end
 end
 
+"""
+    plotNICV(nicvs, trace; show=true, pkg="pyplot")
 
+Plot NICV
+"""
 function plotNICV(nicvs, trace; show=true, pkg="pyplot")
     if pkg == "pyplot"
         pyplotNICV(nicvs, trace; show)
@@ -67,7 +87,7 @@ function pyplotNICV(nicvs, trace; show=true)
         ax1.legend()
     else
         if ndims(nicvs) == 1
-            nicvs = reshape(nicvs,1,length(nicvs))
+            nicvs = reshape(nicvs,length(nicvs),1)
         end
         for nicv in eachcol(nicvs)
             ax1.plot(nicv)

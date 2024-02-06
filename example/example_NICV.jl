@@ -5,9 +5,9 @@ using LeakageAssessment
 function parse_commandline()
     s = ArgParseSettings()
     @add_arg_table! s begin
-        "--output"
-            help = "file name for SNR.png result"
-        "--byte"
+        #"--output"
+        #    help = "file name for SNR.png result"
+        "--bytes"
             arg_type = Int
             nargs = '+'
             help = "bytes to be processed"
@@ -28,11 +28,15 @@ function main()
     # load data
     textin = loaddata(args["textin"])
     traces = loaddata(args["traces"])
+    if !isnothing(args["bytes"])
+        textin = textin[args["bytes"],:]
+    end
 
     # run NICV
     nicvs = NICV(textin, traces)
 
-    # plot SNR
+    # plot NICV
+    println("plotting NICV result...                  \r")
     plotNICV(nicvs, traces)
 end
 

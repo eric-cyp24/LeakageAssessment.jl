@@ -8,7 +8,7 @@ include("utils.jl")
 include("signal_to_noise_ratio.jl")
 include("normalized_inter_class_variance.jl")
 
-export loaddata, groupbyval,
+export groupbyval,
        SNR,  plotSNR,
        NICV, plotNICV
 
