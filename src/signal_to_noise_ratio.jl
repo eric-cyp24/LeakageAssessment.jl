@@ -19,32 +19,24 @@ function computesnr(vals::AbstractVector, traces)
 end
 
 """
-    SNR(vals, traces)
+    SNR(vals::AbstractVector, traces::AbstractMatrix)
+    SNR(vals::AbstractMatrix, traces::AbstractMatrix)
 
 Compute signal to noise ratio.\\
 Start Julia with `\$ julia -t4` to enable multithread computation.
 """
-function SNR(vals, traces)
-    if ndims(vals) == 1
-        traces = length(vals) == size(traces)[2] ? traces : transpose(traces)
-        return computesnr_mthread(vals, traces)
-    elseif ndims(vals) == 2
-        if size(vals)[1] == size(traces)[1]
-            vals, traces = transpose(vals), transpose(traces)
-        elseif size(vals)[2] != size(traces)[2]
-            error("Error: IV length doesn't match traces length!!")
-            return nothing
-        end
-        snrs = Matrix{eltype(traces)}(undef, size(traces)[1], size(vals)[1])
-        for (b,val) in enumerate(eachrow(vals))
-            print("calculating byte $b....                           ",'\r')
-            snrs[:,b] = computesnr_mthread(val,traces)
-        end
-        return snrs
-    else
-        error("ndims(vals) is neither 1 nor 2!!")
-        return nothing
+function SNR(vals::AbstractVector, traces::AbstractMatrix)
+    vals, traces = sizecheck(vals, traces)
+    return computesnr_mthread(vals, traces)
+end
+
+function SNR(vals::AbstractMatrix, traces::AbstractMatrix)
+    snrs = Matrix{eltype(traces)}(undef, size(traces)[1], size(vals)[1])
+    for (b,val) in enumerate(eachrow(vals))
+        print("calculating byte $b....                           ",'\r')
+        snrs[:,b] = computesnr_mthread(val,traces)
     end
+    return snrs
 end
 
 """

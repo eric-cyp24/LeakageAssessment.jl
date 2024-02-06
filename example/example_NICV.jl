@@ -1,6 +1,6 @@
 using ArgParse # Might switch to some other package
 using LeakageAssessment
-
+using LeakageAssessment: loaddata
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -26,12 +26,9 @@ function main()
     args = parse_commandline()
 
     # load data
-    textin = loaddata(args["textin"])
     traces = loaddata(args["traces"])
-    if !isnothing(args["bytes"])
-        textin = textin[args["bytes"],:]
-    end
-
+    textin = isempty(args["bytes"]) ? loaddata(args["textin"]) :
+                                      loaddata(args["textin"])[args["bytes"],:]
     # run NICV
     nicvs = NICV(textin, traces)
 

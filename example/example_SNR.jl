@@ -1,13 +1,13 @@
 using ArgParse # Might switch to some other package
 using LeakageAssessment
-
+using LeakageAssessment: loaddata
 
 function parse_commandline()
     s = ArgParseSettings()
     @add_arg_table! s begin
-        "--output"
-            help = "file name for SNR.png result"
-        "--byte"
+        #"--output"
+        #    help = "file name for SNR.png result"
+        "--bytes"
             arg_type = Int
             nargs = '+'
             help = "bytes to be processed"
@@ -21,20 +21,19 @@ function parse_commandline()
     return parse_args(s)
 end
 
-
-
 function main()
     # parse arguments
     args = parse_commandline()
 
     # load data
-    textin = loaddata(args["textin"])
     traces = loaddata(args["traces"])
-
+    textin = isempty(args["bytes"]) ? loaddata(args["textin"]) :
+                                      loaddata(args["textin"])[args["bytes"],:]
     # run SNR
     snrs = SNR(textin, traces)
 
     # plot SNR
+    println("plotting SNR result...                  \r")
     plotSNR(snrs, traces)
 end
 

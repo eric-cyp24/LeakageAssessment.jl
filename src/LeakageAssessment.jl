@@ -1,6 +1,7 @@
 module LeakageAssessment
 
 using Statistics
+using HypothesisTests: ChisqTest, pvalue
 using Npy
 import PyPlot as plt
 
