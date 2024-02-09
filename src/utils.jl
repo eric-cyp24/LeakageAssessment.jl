@@ -12,18 +12,19 @@ function loaddata(filename::AbstractString)
         #TODO: load hdf5 format
         return nothing
     elseif split(filename, ".")[end] == "npy"
+        # use memory mapping if the file is larger than 1GB
         return loadnpy(filename; memmap=filesize(filename)>1024^3, numpy_order=false)
     end
     println("Done!")
 end
 
 """
-    groupbyval(vals ; minsize=0)
+    groupbyval(vals::AbstractArray; minsize=0)
 
 Given `vals` a list of intermediate values, and return a dictionary of IVs => list_of_indices.
 `minsize` sets the minimum length of each list, remove the one below `minsize`.
 """
-function groupbyval(vals ; minsize=0)
+function groupbyval(vals::AbstractArray; minsize=0)
     groupdict = Dict()
     for (idx, val) in enumerate(vals)
         try
@@ -43,8 +44,31 @@ function groupbyval(vals ; minsize=0)
 end
 
 """
+    isuniform(vals::AbstractVector)
+    isuniform(groupdict::Dict)
+
+Use the Chi-square test to check if the given intermediate values in `vals`
+are uniformly distributed. The intermediate values in most crypto algorithms
+are usually uniformly distributed.
 """
-function sizecheck(vals::AbstractVecOrMat,traces::AbstractMatrix)
+function isuniform(vals::AbstractVecOrMat)
+    grouplens = [length(gl) for gl in values(groupbyval(vals))]
+    return pvalue(ChisqTest(grouplens)) > 0.05
+end
+
+function isuniform(groupdict::Dict)
+    grouplens = [length(gl) for gl in values(groupdict)]
+    return pvalue(ChisqTest(grouplens)) > 0.05
+end
+
+"""
+    sizecheck(vals::AbstractVecOrMat, traces::AbstractMatrix)
+
+Check if length of `vals` matches the length of `traces`.
+Throw `DimensionMismatch` if length doesn't match
+Return the transposed matrices if the matching length is at dim=1
+"""
+function sizecheck(vals::AbstractVecOrMat, traces::AbstractMatrix)
     if ndims(vals) == 1
         traces = length(vals) == size(traces)[2] ? traces : transpose(traces)
         if length(vals) != size(traces)[2]

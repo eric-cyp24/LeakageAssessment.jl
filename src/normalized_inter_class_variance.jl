@@ -1,29 +1,39 @@
 
+### NICV
 
 function SNR2NICV(snr)
     return replace!(1.0 ./ (1.0 .+ 1.0 ./ snr), NaN=>0.0)
 end
 
-function isuniform(vals::AbstractVector)
-    grouplens = [length(gl) for gl in values(groupbyval(vals))]
-    return pvalue(ChisqTest(grouplens)) > 0.05
-end
-
 function computenicv_mthread(vals::AbstractVector, traces)
-    groups   = collect(values(groupbyval(vals)))
-    groupExp = Matrix{eltype(traces)}(undef, size(traces)[1], length(groups))
+    groupdict = groupbyval(vals)
+    groups    = collect(values(groupdict))
+    groupExp  = Matrix{eltype(traces)}(undef, size(traces)[1], length(groups))
     @sync Threads.@threads for i in 1:length(groups)
         groupExp[:,i] = mean(view(traces,:,groups[i]),dims=2)
     end
-    return replace!(var(groupExp,dims=2) ./ var(traces,dims=2), NaN=>0.0)
+    if isuniform(groupdict)
+        return replace!(vec(var(groupExp;dims=2) ./ var(traces;dims=2)), NaN=>0.0)
+    else
+        # use weighted variance if non-uniform
+        w = FrequencyWeights([length(g) for g in groups])
+        return replace!(vec(var(groupExp,w,2;corrected=true) ./ var(traces;dims=2)), NaN=>0.0)
+    end
 end
 
 function computenicv(vals::AbstractVector, traces)
-    groups   = values(groupbyval(vals))
-    groupExp = stack([vec(mean(view(traces,:,g),dims=2)) for g in groups])
-    return replace!(var(groupExp,dims=2) ./ var(traces,dims=2), NaN=>0.0)
+    groupdict = groupbyval(vals)
+    groups    = collect(values(groupdict))
+    groupExp  = stack([vec(mean(view(traces,:,g),dims=2)) for g in groups])
+    return replace!(vec(var(groupExp;dims=2) ./ var(traces;dims=2)), NaN=>0.0)
+    if isuniform(groupdict)
+        return replace!(vec(var(groupExp;dims=2) ./ var(traces;dims=2)), NaN=>0.0)
+    else
+        # use weighted variance if non-uniform
+        w = FrequencyWeights([length(g) for g in groups])
+        return replace!(vec(var(groupExp,w,2;corrected=true) ./ var(traces;dims=2)), NaN=>0.0)
+    end
 end
-
 
 """
     NICV(vals::AbstractVector, traces::AbstractMatrix)
@@ -35,28 +45,20 @@ Start Julia with `\$ julia -t4` to enable multithread computation.
 """
 function NICV(vals::AbstractVector, traces::AbstractMatrix)
     vals, traces = sizecheck(vals, traces)
-    if isuniform(vals)
-        return computenicv_mthread(vals, traces)
-    else
-        return SNR2NICV(SNR(vals, traces))
-    end
+    return computenicv_mthread(vals, traces)
 end
 
-function NICV(vals::AbstractMatrix, traces::AbstractMatrix)
+function NICV(vals::AbstractMatrix, traces::AbstractMatrix{T}) where{T}
     vals, traces = sizecheck(vals, traces)
-    if all([isuniform(v) for v in eachrow(vals)])
-        nicv = Matrix{eltype(traces)}(undef, size(traces)[1],size(vals)[1])
-        for (b,val) in enumerate(eachrow(vals))
-            print("calculating byte $b....                          ",'\r')
-            nicv[:,b] = computenicv_mthread(val, traces)
-        end
-        return nicv
-    else
-        return SNR2NICV(SNR(vals, traces))
+    nicv = Matrix{T}(undef, size(traces)[1],size(vals)[1])
+    for (b,val) in enumerate(eachrow(vals))
+        print("calculating byte $b....                          ",'\r')
+        nicv[:,b] = computenicv_mthread(val, traces)
     end
+    return nicv
 end
 
-
+### Plotting
 
 """
     plotNICV(nicvs, trace; show=true, pkg="pyplot")
@@ -70,10 +72,8 @@ function plotNICV(nicvs, trace; show=true, pkg="pyplot")
     return
 end
 
-function pyplotNICV(nicvs, trace; show=true)
-    if ndims(trace) == 2
-        trace = vec(mean(trace, dims=2))
-    end
+function pyplotNICV(nicvs, trace::AbstractVecOrMat; show=true)
+    trace = trace isa AbstractMatrix ? vec(mean(trace, dims=2)) : trace
     fig, ax1 = plt.subplots(figsize=(16,9))
     
     # plot power trace(s)
