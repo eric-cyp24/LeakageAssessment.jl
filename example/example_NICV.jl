@@ -27,8 +27,15 @@ function main()
 
     # load data
     traces = loaddata(args["traces"])
-    textin = isempty(args["bytes"]) ? loaddata(args["textin"]) :
-                                      loaddata(args["textin"])[args["bytes"],:]
+    textin = loaddata(args["textin"])
+    if ndims(traces) == 3 # testing dataset...
+        a,b,c = size(traces)
+        traces = reshape(traces,  a,b*c)
+        a,c   = size(textin)
+        textin = reshape(textin,a÷b,b*c)
+    end
+    textin = isempty(args["bytes"]) ? textin : view(textin,args["bytes"],:)
+
     # run NICV
     nicvs = NICV(textin, traces)
 

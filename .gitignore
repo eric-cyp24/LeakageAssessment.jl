@@ -1,3 +1,7 @@
-
-data/*
 test/*
+data/*
+figures/
+Manifest.toml
+__pycache__/
+
+Thumbs.db

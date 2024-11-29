@@ -4,11 +4,11 @@
 ### NICV
 
 """
-    plotNICV(nicvs, trace::AbstractVecOrMat; show::Bool=true, pkg=:pythonplot)
+    plotNICV(nicvs, trace::AbstractVecOrMat; show::Bool=true, backend="pyplot", block::Bool=true)
 
 Plot NICV
 """
-function plotNICV(nicvs, trace::AbstractVecOrMat; show::Bool=true, backend="pyplot", block::Bool=true)
+function plotNICV(nicvs, trace::AbstractVecOrMat; show::Bool=true, backend="pyplot", block::Bool=true, plot_title="")
 
     if backend == :gr # recommended non-interactive plot method
         gr(); margin=8Plots.mm
@@ -20,21 +20,21 @@ function plotNICV(nicvs, trace::AbstractVecOrMat; show::Bool=true, backend="pypl
         # The "TkAgg" plot is transparent, showing background onto the plot... maybe a bug in PythonPlot
         Plots.PythonPlot.matplotlib.use("Qt5Agg") # a python call to switch matplotlib to Qt5Agg backend
     elseif backend == "pyplot"
-        return pyplotNICV(nicvs, trace; show)
+        return pyplotNICV(nicvs, trace; show, title=plot_title)
     end
 
     trace = trace isa AbstractMatrix ? vec(mean(trace, dims=2)) : trace
 
     # plot NICVs
-    label  = nicvs isa Dict ? sort(collect(keys(nicvs)))'      : "" # row vector
-    _nicvs = nicvs isa Dict ? stack([nicvs[l] for l in label']) : nicvs
+    label  = nicvs isa Dict ? reshape(sort(collect(keys(nicvs))),1,length(nicvs)) : "" # row vector
+    _nicvs = nicvs isa Dict ? stack([nicvs[l] for l in vec(label)]) : nicvs
     plot(_nicvs; size=(1600,900), label, ylims=(-0.02,1.7), ticks=:native, margin,
                  xlabel="Time Sample", ylabel="Normalized Interclass Variance")
     
     # plot power trace(s)
     lim   = maximum(abs.(trace))*1.2
     p = plot!(twinx(), trace; ylims=(-5*lim, lim), ylabel="Voltage (V)", #ticks=:native,
-                              linecolor=:blue, z_order=:back, label="")
+                              linecolor=:blue, z_order=:back, label="", plot_title)
     
 
     if show 
@@ -52,22 +52,34 @@ end
 
 # this function is written to work directly with PythonPlot package
 # this is the prefered method for interactive plot
-function pyplotNICV(nicvs, trace::AbstractVecOrMat; show::Bool=true)
+function pyplotNICV(nicvs, trace::AbstractVecOrMat; show::Bool=true, trnum::Integer=1, title="",
+                                                    figsize=(16,9), kwargs...)
     # Warning: this is a dirty hack to make PythonPlot work on my computer (callas)
     # PythonPlot is unable to find "Qt5Agg" as an interactive backend
     # That's why ENV["MPLBACKEND"]="TkAgg" is set in Leakageassessment.jl
     # this is basically a python call to tell matplotlib to switch backend to Qt5Agg
     plt.matplotlib.use("Qt5Agg") 
     
-    trace = trace isa AbstractMatrix ? vec(mean(trace, dims=2)) : trace
-    fig, ax1 = plt.subplots(figsize=(16,9))
+    trace = trace isa AbstractVector ? trace :
+                          trnum == 1 ? vec(mean(trace, dims=2)) : trace[:,1:trnum]
+    fig, ax1 = plt.subplots(figsize=figsize, kwargs...)
+    (title=="") || fig.suptitle(title)
  
     # plot power trace(s)
     ax2 = ax1.twinx()
     lim = maximum(abs.(trace))*1.2
     ax2.set_ylabel("Voltage (V)")
     ax2.set_ylim(-5*lim,lim)
-    ax2.plot(trace, color="blue")
+    if trace isa AbstractVector
+        ax2.plot(trace, color="blue")
+    else
+        cm = plt.cm.get_cmap("tab20")
+        for (i,tr) in enumerate(eachcol(trace))
+            ax2.plot(tr,color=cm.colors[2*i-1])
+        end
+        #traces = trace
+        ax2.plot(vec(mean(trace,dims=2)), color="blue")
+    end
         
     # plot SNR
     ax1.set_zorder(ax2.get_zorder()+1)
@@ -77,8 +89,8 @@ function pyplotNICV(nicvs, trace::AbstractVecOrMat; show::Bool=true)
     ax1.set_ylim(-0.02,1.7)
     
     if nicvs isa Dict
-        ax1.plot([None],color="blue",label="power trace")
-        for (name,nicv) in nicvs
+        ax1.plot([nothing],color="blue",label="power trace")
+        for (name,nicv) in sort(nicvs)
             ax1.plot(nicv,label=name)
         end
         ax1.legend()
@@ -172,7 +184,7 @@ function pyplotSNR(snrs, trace::AbstractVecOrMat; show::Bool=true)
     ax1.set_ylim(-0.02,lim)
     
     if snrs isa Dict
-        ax1.plot([None],color="blue",label="power trace")
+        ax1.plot([nothing],color="blue",label="power trace")
         for (name,snr) in snrs
             ax1.plot(snr,label=name)
         end
@@ -203,17 +215,26 @@ end
 Load data from the given file name.
 For .npy file, `loaddata` returns the native julia Fortran order NOT the Numpy/C order.
 """
-function loaddata(filename::AbstractString)
+function loaddata(filename::AbstractString; datapath=nothing)
     # direct read for now... change to mmap later
     print("Loading data: $filename...                                      \r")
-    if split(filename, ".")[end] == "hdf5"
+    if split(filename, ".")[end] == "h5"
         #TODO: load hdf5 format
-        return nothing
+        return h5open(filename) do f
+            if isnothing(datapath)
+                return read(f)
+            else
+                dset = f[datapath]
+                return length(dset) > 1024^3 && HDF5.ismmappable(dset) ? 
+                       HDF5.readmmap(dset) : read(dset)
+            end
+        end
     elseif split(filename, ".")[end] == "npy"
         # use memory mapping if the file is larger than 1GB
         return loadnpy(filename; memmap=filesize(filename)>1024^3, numpy_order=false)
+    else
+        error("file name doesn't end with .h5 or .npy")
     end
-    println("Done!")
 end
 
 
