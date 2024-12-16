@@ -25,7 +25,7 @@ function computenicv(vals::AbstractVector, traces)
     groupdict = groupbyval(vals)
     groups    = collect(values(groupdict))
     groupExp  = stack([vec(mean(view(traces,:,g),dims=2)) for g in groups])
-    return replace!(vec(var(groupExp;dims=2) ./ var(traces;dims=2)), NaN=>0.0)
+    #return replace!(vec(var(groupExp;dims=2) ./ var(traces;dims=2)), NaN=>0.0)
     if isuniform(groupdict)
         return replace!(vec(var(groupExp;dims=2,corrected=false) ./ var(traces;dims=2)), NaN=>0.0)
     else

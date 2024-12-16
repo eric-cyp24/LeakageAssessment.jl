@@ -1,0 +1,9 @@
+using LeakageAssessment
+using Statistics, Test
+
+@testset verbose=true "LeakageAssessment tests" begin
+
+    @testset "NICV.jl tests" begin
+        include("NICV_tests.jl")
+    end
+end
