@@ -11,22 +11,17 @@ close(f)
 
 
 @testset "plotNICV" begin
-    LeakageAssessment.plotNICV(nicvs,traceavg; backend=:gr)
+    print("plotting NICV without label    ")
+    LeakageAssessment.plotNICV(nicvs,traceavg; block=true, title="NICV without labels")
 end
 
 @testset "plotNICV with Dict" begin
-    LeakageAssessment.plotNICV(nicvs_dict,traceavg; backend=:gr)
+    print("plotting NICV with label (isa Dict())   ")
+    LeakageAssessment.plotNICV(nicvs_dict,traceavg; block=true, title="NICV with labels")
 end
 
-@testset "plotNICV pythonplot backend" begin
-    print("Close the figure window to continue...")
-    LeakageAssessment.plotNICV(nicvs,traceavg;backend=:pythonplot)
-    println()
-end
-
-@testset "pyplotNICV" begin
-    print("Close the figure window to continue...")
-    LeakageAssessment.pyplotNICV(nicvs,traceavg)
-    println()
+@testset "plotNICV with Dict" begin
+    print("plotting NICV with ppc=20   ")
+    LeakageAssessment.plotNICV(nicvs_dict,traceavg; block=true, ppc=20, title="test ppc=20")
 end
 

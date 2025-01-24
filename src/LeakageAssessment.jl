@@ -1,10 +1,8 @@
 module LeakageAssessment
 
-ENV["MPLBACKEND"]="TkAgg" # dirty hack, set this ENV variable to help PythonPlot find a interactive backend on my computer (callas)
-using StatsBase, Plots
+using HDF5, Plots, StatsBase
 using HypothesisTests: ChisqTest, pvalue
-using HDF5, Npy
-import PythonPlot as plt
+using Npy
 
 include("utils.jl")
 include("signal_to_noise_ratio.jl")
