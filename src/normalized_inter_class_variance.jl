@@ -1,10 +1,6 @@
 
 ### NICV
 
-function SNR2NICV(snr)
-    return replace!(1.0 ./ (1.0 .+ 1.0 ./ snr), NaN=>0.0)
-end
-
 function computenicv_mthread(vals::AbstractVector, traces)
     groupdict = groupbyval(vals)
     groups    = collect(values(groupdict))
@@ -47,7 +43,6 @@ function NICV(vals::AbstractVector, traces::AbstractMatrix)
     vals, traces = sizecheck(vals, traces)
     return computenicv_mthread(vals, traces)
 end
-
 function NICV(vals::AbstractMatrix, traces::AbstractMatrix{T}) where{T}
     vals, traces = sizecheck(vals, traces)
     nicv = Matrix{T}(undef, size(traces)[1],size(vals)[1])
@@ -59,6 +54,11 @@ function NICV(vals::AbstractMatrix, traces::AbstractMatrix{T}) where{T}
 end
 
 
-
+function SNR2NICV(vals::AbstractVecOrMat, traces::AbstractMatrix)
+    return SNR2NICV(SNR(vals, traces))
+end
+function SNR2NICV(snr)
+    return replace!(1.0 ./ (1.0 .+ 1.0 ./ snr), NaN=>0.0)
+end
 
 

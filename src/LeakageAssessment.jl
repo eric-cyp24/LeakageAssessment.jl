@@ -11,7 +11,9 @@ include("test_vector_leakage_assessment.jl")
 include("plots.jl")
 
 export groupbyval, isuniform, sizecheck,
-       SNR,  plotSNR,
-       NICV, plotNICV
+       SNR,
+       NICV, SNR2NICV,
+       ttest, tvla,
+       plotSNR, plotNICV, plotTVLA
 
 end # module LeakageAssessment

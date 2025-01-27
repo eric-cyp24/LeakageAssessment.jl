@@ -44,7 +44,6 @@ function SNR(vals::AbstractVector, traces::AbstractMatrix)
     vals, traces = sizecheck(vals, traces)
     return computesnr_mthread(vals, traces)
 end
-
 function SNR(vals::AbstractMatrix, traces::AbstractMatrix{T}) where{T}
     vals, traces = sizecheck(vals, traces)
     snrs = Matrix{T}(undef, size(traces,1), size(vals,1))
