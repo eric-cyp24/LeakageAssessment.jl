@@ -1,5 +1,5 @@
 data/*
-figures/
+scripts_test/
 Manifest.toml
 __pycache__/
 

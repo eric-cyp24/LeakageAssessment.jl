@@ -7,6 +7,8 @@ using Npy
 include("utils.jl")
 include("signal_to_noise_ratio.jl")
 include("normalized_inter_class_variance.jl")
+include("test_vector_leakage_assessment.jl")
+include("plots.jl")
 
 export groupbyval, isuniform, sizecheck,
        SNR,  plotSNR,
