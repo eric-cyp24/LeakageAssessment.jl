@@ -10,8 +10,8 @@ using Statistics, Test
     @testset verbose=true "plotNICV tests" begin
         include("plotNICV_tests.jl")
     end
-    @testset verbose=true "tvla.jl tests" begin
-        include("tvla_tests.jl")
+    @testset verbose=true "TVLA.jl tests" begin
+        include("TVLA_tests.jl")
     end
     @testset verbose=true "plotTtest tests" begin
         include("plotTtest_tests.jl")

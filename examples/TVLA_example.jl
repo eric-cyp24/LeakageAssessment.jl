@@ -14,10 +14,10 @@ function parse_commandline()
         "--threshold"
             arg_type = Float32
             default  = 4.5
-            help     = "tvla leakage threshold"
+            help     = "TVLA leakage threshold"
         "--single"
             action   = :store_true
-            help     = "run tvla only once, not splitting into 2 subsets"
+            help     = "run TVLA only once, not splitting into 2 subsets"
         "traces1"
             help     = "trace group 1 (.npy file)"
             required = true
@@ -36,12 +36,12 @@ function main()
     traces1 = loaddata(args["traces1"])
     traces2 = loaddata(args["traces2"])
 
-    # plot tvla
+    # plot TVLA
     if args["single"]
-        print("plotting tvla result    ")
+        print("plotting TVLA result    ")
         plotTtest(traces1, traces2; block=true, ppc=args["ppc"], threshold=args["threshold"])
     else
-        p = tvla(traces1, traces2; ppc=args["ppc"], threshold=args["threshold"])
+        p = TVLA(traces1, traces2; ppc=args["ppc"], threshold=args["threshold"])
         display(p); print("Press Enter to continue..."); readline()
     end
 end

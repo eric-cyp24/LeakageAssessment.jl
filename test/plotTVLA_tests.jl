@@ -24,11 +24,11 @@ end
 end
 
 
-@testset "tvla" begin
+@testset "TVLA" begin
     X0 =   randn(16,100000) .+ zeros(16)
     X2 = 2*randn(16,100000) .+ [[10.0^i for i in -6:1];[10.0^i for i in 1:-1:-6]]
-    p = tvla(X0, X2; markleakages=true)
-    print("plotting tvla                           ")
+    p = TVLA(X0, X2; markleakages=true)
+    print("plotting TVLA                           ")
     display(p)
     print("Press Enter to continue...")
     readline()
