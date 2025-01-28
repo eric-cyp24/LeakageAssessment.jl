@@ -24,7 +24,7 @@ function plotNICV(nicvs, trace::AbstractVecOrMat; show::Bool=true, block::Bool=f
 
     # plot power trace(s)
     lim = maximum(abs.(trace))*1.2
-    plot!(twinx(), x, trace; ylims=(-5*lim, lim), ylabel="Voltage (V)", linecolor=:blue, label="")
+    plot!(twinx(), x, trace; ylims=(-5*lim, lim), ylabel="voltage (V)", linecolor=:blue, label="")
 
     # swap z_order of two plot
     reverse!(p.subplots)
@@ -60,14 +60,14 @@ function plotSNR(snrs, trace::AbstractVecOrMat; show::Bool=true, block::Bool=fal
     xlabel = ppc==0 ? "time sample"   : "clock cycle"
 
     # plot SNRs
-    label  = snrs isa Dict ? reshape(sort(collect(keys(snrs))),1,length(nicvs)) : ""
+    label  = snrs isa Dict ? reshape(sort(collect(keys(snrs))),1,length(snrs)) : ""
     _snrs  = snrs isa Dict ? stack([snrs[l] for l in vec(labels)]) : snrs
-    plot(x, _snrs; label, ylims=(-0.02,maximum(snrs)*1.7), margin=8Plots.mm, xlabel, ylabel="Signal to Noise Ratio")
-    plot!([]; linecolor=:blue, z_order=:back, label= nicvs isa Dict ? "power trace" : "")
+    plot!(x, _snrs; label, ylims=(-0.02,maximum(snrs)*1.7), margin=8Plots.mm, xlabel, ylabel="Signal to Noise Ratio")
+    plot!([]; linecolor=:blue, z_order=:back, label= snrs isa Dict ? "power trace" : "")
 
     # plot power trace(s)
     lim = maximum(abs.(trace))*1.2
-    plot!(twinx(), x, trace; ylims=(-5*lim, lim), yaxis="Voltage (V)", linecolor=:blue, label="")
+    plot!(twinx(), x, trace; ylims=(-5*lim, lim), ylabel="voltage (V)", linecolor=:blue, label="")
 
     # swap z_order of two plot
     reverse!(p.subplots)
