@@ -17,7 +17,7 @@ end
 """
     studentststatistics(X1::AbstractMatrix, X2::AbstractMatrix)
 
-Student's t-test is an exact test for the equality of the means of two i.i.d. normal populations 
+Student's t-test is an exact test for the equality of the means of two i.i.d. normal populations
 with unknown, but equal, variances.
 """
 function studentststatistics(X1::AbstractMatrix, X2::AbstractMatrix)
@@ -41,10 +41,16 @@ end
 function tstatistic(X1::AbstractMatrix, X2::AbstractMatrix; testtype=:welch)
     return tstatistics(X1,X2;testtype)[1]
 end
-const ttest=tstatistic
+const Ttest=tstatistic
 
+# checkout: https://www.rambus.com/wp-content/uploads/2015/08/TVLA-DTR-with-AES.pdf
+"""
+    tvla(traces1::AbstractMatrix, traces2::AbstractMatrix; show::Bool=true, block::Bool=true, threshold=4.5,
+                                                           markleakages::Bool=false, testrange=:middle, kwargs...)
 
-function tvla(traces1::AbstractMatrix, traces2::AbstractMatrix; show::Bool=true, block::Bool=true, threshold=4.5, 
+Test Vector Leakage Assessment (TVLA). test the dataset twice for higher confidence.
+"""
+function tvla(traces1::AbstractMatrix, traces2::AbstractMatrix; show::Bool=true, block::Bool=true, threshold=4.5,
                                                                 markleakages::Bool=false, testrange=:middle, kwargs...)
 
     # calculate t-statistics (x2 times)
@@ -70,9 +76,9 @@ function tvla(traces1::AbstractMatrix, traces2::AbstractMatrix; show::Bool=true,
 
     # plot tvla result
     block && print("plotting tvla test 1    ")
-    p1 = plotTVLA(ttrace1, tr1avg1, tr2avg1; threshold, leakages=leakagepoints1, title="TVLA test 1", show, block, kwargs...)
+    p1 = plotTtest(ttrace1, tr1avg1, tr2avg1; threshold, leakages=leakagepoints1, title="TVLA test 1", show, block, kwargs...)
     block && print("plotting tvla test 2    ")
-    p2 = plotTVLA(ttrace2, tr1avg2, tr2avg2; threshold, leakages=leakagepoints2, title="TVLA test 2", show, block, kwargs...)
+    p2 = plotTtest(ttrace2, tr1avg2, tr2avg2; threshold, leakages=leakagepoints2, title="TVLA test 2", show, block, kwargs...)
 
     return plot(p1,p2)
 end

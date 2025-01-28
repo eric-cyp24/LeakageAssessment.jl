@@ -7,7 +7,7 @@ using Test, Statistics, HypothesisTests
     for N in [10,100,1000,100000]
         X0 = randn(8,N) .+ t0
         X1 = randn(8,N) .+ t1
-        @test ttest(X0,X1;testtype=:student) ≈ [EqualVarianceTTest(X0[i,:],X1[i,:]).t for i in 1:8]
+        @test Ttest(X0,X1;testtype=:student) ≈ [EqualVarianceTTest(X0[i,:],X1[i,:]).t for i in 1:8]
     end
 end
 
@@ -17,7 +17,7 @@ end
     for N in [10,100,1000,100000]
         X0 =   randn(8,N) .+ t0
         X2 = 2*randn(8,N) .+ t1
-        @test ttest(X0,X2;testtype=:welch) ≈ [UnequalVarianceTTest(X0[i,:],X2[i,:]).t for i in 1:8]
+        @test Ttest(X0,X2;testtype=:welch) ≈ [UnequalVarianceTTest(X0[i,:],X2[i,:]).t for i in 1:8]
     end
 end
 

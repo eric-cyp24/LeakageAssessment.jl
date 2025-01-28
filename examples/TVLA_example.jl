@@ -37,9 +37,9 @@ function main()
     traces2 = loaddata(args["traces2"])
 
     # plot tvla
-    println("plotting tvla result...                  \r")
     if args["single"]
-        plotTVLA(traces1, traces2; block=true, ppc=args["ppc"], threshold=args["threshold"])
+        print("plotting tvla result    ")
+        plotTtest(traces1, traces2; block=true, ppc=args["ppc"], threshold=args["threshold"])
     else
         p = tvla(traces1, traces2; ppc=args["ppc"], threshold=args["threshold"])
         display(p); print("Press Enter to continue..."); readline()

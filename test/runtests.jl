@@ -13,7 +13,7 @@ using Statistics, Test
     @testset verbose=true "tvla.jl tests" begin
         include("tvla_tests.jl")
     end
-    @testset verbose=true "plotTVLA tests" begin
-        include("plotTVLA_tests.jl")
+    @testset verbose=true "plotTtest tests" begin
+        include("plotTtest_tests.jl")
     end
 end

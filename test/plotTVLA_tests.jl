@@ -8,19 +8,19 @@ trfixedavg = read(f,"trfixedavg")
 trrandavg  = read(f,"trrandavg")
 close(f)
 
-@testset "plotTVLA" begin
-    print("plotting TVLA                           ")
-    plotTVLA(tval, trfixedavg, trrandavg; block=true, title="TVLA fixed vs. random")
+@testset "plotTtest" begin
+    print("plotting Ttest                          ")
+    plotTtest(tval, trfixedavg, trrandavg; block=true, title="t-test fixed vs. random")
 end
 
-@testset "plotTVLA with marked leakage" begin
-    print("plotting TVLA with marked leakage       ")
-    plotTVLA(tval, trfixedavg, trrandavg; block=true, mark=true, title="TVLA marked leakage")
+@testset "plotTtest with marked leakage" begin
+    print("plotting Ttest with marked leakage      ")
+    plotTtest(tval, trfixedavg, trrandavg; block=true, mark=true, title="t-test marked leakage")
 end
 
-@testset "plotTVLA by clock cycle" begin
-    print("plotting TVLA with ppc=4                ")
-    plotTVLA(tval, trfixedavg, trrandavg; block=true, ppc=4, title="test xlabel: 'time sample' -> 'clock cycle'")
+@testset "plotTtest by clock cycle" begin
+    print("plotting Ttest with ppc=4               ")
+    plotTtest(tval, trfixedavg, trrandavg; block=true, ppc=4, title="test xlabel: 'time sample' -> 'clock cycle'")
 end
 
 

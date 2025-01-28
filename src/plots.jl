@@ -86,13 +86,13 @@ function plotSNR(snrs, trace::AbstractVecOrMat; show::Bool=true, block::Bool=fal
     return p
 end
 
-## TVLA
+## t-test
 
-function plotTVLA(trace1::AbstractMatrix, trace2::AbstractMatrix; testtype=:welch, show::Bool=true, block::Bool=false, title="", ppc::Integer=0,
-                                                                  threshold::Real=4.5, leakages=[], mark::Bool=false, kwargs...)
-    return plotTVLA(tstatistics(trace1, trace2; testtype)...; show, block, ppc, title, threshold, leakages, mark, kwargs...)
+function plotTtest(traces1::AbstractMatrix, traces2::AbstractMatrix; testtype=:welch, show::Bool=true, block::Bool=false, title="", ppc::Integer=0,
+                                                                    threshold::Real=4.5, leakages=[], mark::Bool=false, kwargs...)
+    return plotTtest(tstatistics(traces1, traces2; testtype)...; show, block, ppc, title, threshold, leakages, mark, kwargs...)
 end
-function plotTVLA(tvalue::T, trace1::T, trace2::T; show::Bool=true, block::Bool=false, ppc::Integer=0, title="",
+function plotTtest(tvalue::T, trace1::T, trace2::T; show::Bool=true, block::Bool=false, ppc::Integer=0, title="",
                                                    threshold=4.5, leakages=[], mark::Bool=false, kwargs...) where{T <: AbstractVector}
     p = plot()
 

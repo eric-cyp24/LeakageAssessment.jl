@@ -13,7 +13,7 @@ include("plots.jl")
 export groupbyval, isuniform, sizecheck,
        SNR,
        NICV, SNR2NICV,
-       ttest, tvla,
-       plotSNR, plotNICV, plotTVLA
+       Ttest, tvla,
+       plotSNR, plotNICV, plotTtest
 
 end # module LeakageAssessment
