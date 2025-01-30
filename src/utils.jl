@@ -2,25 +2,21 @@
 ### data read/write ####
 
 """
-    loaddata(filename::AbstractString)
+    loaddata(filename::AbstractString; datapath="data")
 
 Load data from the given file name.
 For .npy file, `loaddata` returns the native julia Fortran order NOT the Numpy/C order.
 """
-function loaddata(filename::AbstractString; datapath=nothing)
+function loaddata(filename::AbstractString; datapath="data")
     if !isfile(filename)
         error("$filename doesn't exist!!")
     else
         if split(filename, ".")[end] == "h5" && HDF5.ishdf5(filename)
             return h5open(filename) do f
-                if isnothing(datapath)
-                    return read(f, "data")
-                else
-                    dset = f[datapath]
-                    # use memory mapping if the file is larger than 1GB
-                    return length(dset) > 2^30 && HDF5.ismmappable(dset) ?
-                           HDF5.readmmap(dset) : read(dset)
-                end
+                dset = f[datapath]
+                # use memory mapping if the file is larger than 1GB
+                return length(dset) > 2^30 && HDF5.ismmappable(dset) ?
+                       HDF5.readmmap(dset) : read(dset)
             end
         elseif split(filename, ".")[end] == "npy" && isnpy(filename)
             # use memory mapping if the file is larger than 1GB
