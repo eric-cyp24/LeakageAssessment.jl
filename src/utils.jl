@@ -5,7 +5,6 @@
     loaddata(filename::AbstractString; datapath="data")
 
 Load data from the given file name.
-For .npy file, `loaddata` returns the native julia Fortran order NOT the Numpy/C order.
 """
 function loaddata(filename::AbstractString; datapath="data")
     if !isfile(filename)
@@ -18,11 +17,8 @@ function loaddata(filename::AbstractString; datapath="data")
                 return length(dset) > 2^30 && HDF5.ismmappable(dset) ?
                        HDF5.readmmap(dset) : read(dset)
             end
-        elseif split(filename, ".")[end] == "npy" && isnpy(filename)
-            # use memory mapping if the file is larger than 1GB
-            return loadnpy(filename; memmap=filesize(filename)>2^30, numpy_order=false)
         else
-            error("$filename is neither a .h5 nor a .npy file!!")
+            error("$filename is not a .h5 file!!")
         end
     end
 end

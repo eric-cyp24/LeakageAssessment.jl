@@ -16,10 +16,10 @@ function parse_commandline()
             nargs    = '+'
             help     = "bytes to be processed"
         "textin"
-            help     = "textin (.npy file)"
+            help     = "textin (textin.h5 file)"
             required = true
         "traces"
-            help     = "traces (.npy file)"
+            help     = "traces (traces.h5 file)"
             required = true
     end
     return parse_args(s)

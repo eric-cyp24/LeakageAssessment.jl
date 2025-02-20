@@ -2,7 +2,6 @@ module LeakageAssessment
 
 using HDF5, Plots, StatsBase
 using HypothesisTests: ChisqTest, pvalue
-using Npy
 
 include("utils.jl")
 include("signal_to_noise_ratio.jl")

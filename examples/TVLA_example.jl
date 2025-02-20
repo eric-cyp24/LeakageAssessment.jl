@@ -19,10 +19,10 @@ function parse_commandline()
             action   = :store_true
             help     = "run TVLA only once, not splitting into 2 subsets"
         "traces1"
-            help     = "trace group 1 (.npy file)"
+            help     = "trace group 1 (traces.h5 file)"
             required = true
         "traces2"
-            help     = "trace group 2 (.npy file)"
+            help     = "trace group 2 (traces.h5 file)"
             required = true
     end
     return parse_args(s)
