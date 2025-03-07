@@ -41,14 +41,19 @@ Start Julia with `\$ julia -t4` to enable multithread computation.
 """
 function NICV(vals::AbstractVector, traces::AbstractMatrix)
     vals, traces = sizecheck(vals, traces)
-    return computenicv_mthread(vals, traces)
+    if Threads.nthreads() == 1
+        return computenicv(vals, traces)
+    else
+        return computenicv_mthread(vals, traces)
+    end
 end
 function NICV(vals::AbstractMatrix, traces::AbstractMatrix{T}) where{T}
     vals, traces = sizecheck(vals, traces)
     nicv = Matrix{T}(undef, size(traces)[1],size(vals)[1])
+    calculatenicv = Threads.nthreads() > 1 ? computenicv_mthread : computenicv
     for (b,val) in enumerate(eachrow(vals))
         print("calculating byte $b....                          ",'\r')
-        nicv[:,b] = computenicv_mthread(val, traces)
+        nicv[:,b] = calculatenicv(val, traces)
     end
     return nicv
 end
