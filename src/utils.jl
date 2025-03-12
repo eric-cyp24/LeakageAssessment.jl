@@ -12,9 +12,10 @@ function loaddata(filename::AbstractString; datapath="data")
     else
         if split(filename, ".")[end] == "h5" && HDF5.ishdf5(filename)
             return h5open(filename) do f
-                dset = f[datapath]
+                dset  = f[datapath]
+                dsize = length(dset)*sizeof(HDF5.get_jl_type(dset))
                 # use memory mapping if the file is larger than 1GB
-                return length(dset) > 2^30 && HDF5.ismmappable(dset) ?
+                return dsize > 2^30 && HDF5.ismmappable(dset) ?
                        HDF5.readmmap(dset) : read(dset)
             end
         else
