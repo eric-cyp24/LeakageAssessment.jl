@@ -9,17 +9,17 @@ trrandavg  = read(f,"trrandavg")
 close(f)
 
 @testset "plotTtest" begin
-    print("plotting Ttest                          ")
+    print("\rplotting Ttest                          ")
     plotTtest(tval, trfixedavg, trrandavg; block=true, title="t-test fixed vs. random")
 end
 
 @testset "plotTtest with marked leakage" begin
-    print("plotting Ttest with marked leakage      ")
+    print("\rplotting Ttest with marked leakage      ")
     plotTtest(tval, trfixedavg, trrandavg; block=true, mark=true, title="t-test marked leakage")
 end
 
 @testset "plotTtest by clock cycle" begin
-    print("plotting Ttest with ppc=4               ")
+    print("\rplotting Ttest with ppc=4               ")
     plotTtest(tval, trfixedavg, trrandavg; block=true, ppc=4, title="test xlabel: 'time sample' -> 'clock cycle'")
 end
 
@@ -28,7 +28,7 @@ end
     X0 =   randn(16,100000) .+ zeros(16)
     X2 = 2*randn(16,100000) .+ [[10.0^i for i in -6:1];[10.0^i for i in 1:-1:-6]]
     p = TVLA(X0, X2; markleakages=true)
-    print("plotting TVLA                           ")
+    print("\rplotting TVLA                           ")
     display(p)
     print("Press Enter to continue...")
     readline()

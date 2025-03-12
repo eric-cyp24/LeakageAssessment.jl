@@ -11,17 +11,17 @@ close(f)
 
 
 @testset "plotNICV" begin
-    print("plotting NICV without label             ")
+    print("\rplotting NICV without label             ")
     plotNICV(nicvs,traceavg; block=true, title="NICV without labels")
 end
 
 @testset "plotNICV with Dict" begin
-    print("plotting NICV with label (isa Dict())   ")
+    print("\rplotting NICV with label (isa Dict())   ")
     plotNICV(nicvs_dict,traceavg; block=true, title="NICV with labels")
 end
 
 @testset "plotNICV by clock cycle" begin
-    print("plotting NICV with ppc=20               ")
+    print("\rplotting NICV with ppc=20               ")
     plotNICV(nicvs_dict,traceavg; block=true, ppc=20, title="test xlabel: 'time sample' -> 'clock cycle'")
 end
 
