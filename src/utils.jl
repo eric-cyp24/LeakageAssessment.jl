@@ -79,7 +79,7 @@ function sizecheck(vals::AbstractVecOrMat, traces::AbstractMatrix)
     if ndims(vals) == 1
         traces = length(vals) == size(traces,2) ? traces : transpose(traces)
         if length(vals) != size(traces,2)
-            msg = "vals length ($(length(vals))) doesn't match traces length ($(size(traces,2)))"
+            msg = "vals length $(length(vals)) doesn't match traces length $(size(traces,2))"
             throw(DimensionMismatch(msg))
         end
     elseif ndims(vals) == 2
@@ -87,7 +87,7 @@ function sizecheck(vals::AbstractVecOrMat, traces::AbstractMatrix)
             vals, traces = transpose(vals), transpose(traces)
         end
         if size(vals,2) != size(traces,2)
-            msg = "vals length ($(size(vals))) doesn't match traces length ($(size(traces)))"
+            msg = "vals length $(size(vals)) doesn't match traces length $(size(traces))"
             throw(DimensionMismatch(msg))
         end
     end
