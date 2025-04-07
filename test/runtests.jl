@@ -1,5 +1,5 @@
 using LeakageAssessment
-using HypothesisTests
+using HDF5, HypothesisTests
 using Statistics, Test
 
 @testset verbose=true "LeakageAssessment tests" begin
