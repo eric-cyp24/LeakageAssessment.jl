@@ -1,6 +1,6 @@
 name = "LeakageAssessment"
 uuid = "25e90590-d021-4b75-879b-3069a64281bf"
-authors = ["cyp24 "]
+authors = ["Eric Peng <cyp24@cl.cam.ac.uk>"]
 version = "0.1.0"
 
 [deps]
