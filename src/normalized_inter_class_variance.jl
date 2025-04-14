@@ -35,7 +35,7 @@ end
     NICV(vals::AbstractVector, traces::AbstractMatrix)
     NICV(vals::AbstractMatrix, traces::AbstractMatrix)
 
-Compute normalized inter class variance. 
+Compute normalized inter class variance.
 If `vals` is not uniformly distributed, calculate NICV with SNR.\\
 Start Julia with `\$ julia -t4` to enable multithread computation.
 """

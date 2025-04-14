@@ -100,14 +100,14 @@ function plotTtest(tvalue::T, trace1::T, trace2::T; show::Bool=true, block::Bool
     xlabel    = ppc==0 ? "time sample"     : "clock cycle"
     ymax,ymin = max(maximum(tvalue)*1.2,10), min(minimum(tvalue)*1.2,-10)
     leakages  = mark ? [findall(>(threshold), tvalue);findall(<(-threshold), tvalue)] : leakages
-    
+
     # plot t-value trace
     plot!(x, tvalue; ylims=(ymin,ymax+0.3*(ymax-ymin)), label="t-value", margin=8Plots.mm, xlabel, ylabel="t-value")
     plot!([]; z_order=:back, label="trace group 2")
     plot!([]; z_order=:back, label="trace group 1")
     # checkout: https://docs.juliaplots.org/dev/attributes/
     # line=(-seriestype-, style, -arrow-, alpha, width, color)
-    hline!([ threshold]; label="", line=(:dash, 1.0, 2, :red)) 
+    hline!([ threshold]; label="", line=(:dash, 1.0, 2, :red))
     hline!([-threshold]; label="", line=(:dash, 1.0, 2, :red))
     # marker=(-shape-, size, alpha, color, stroke=(width, alpha, color, style) )
     isempty(leakages) || scatter!(x[leakages], tvalue[leakages]; marker=(:utriangle, 5, :red, stroke(0)), label="leakage points")

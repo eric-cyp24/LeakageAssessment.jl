@@ -39,7 +39,7 @@ function main()
         textin = reshape(textin,a÷b,b*c)
     end
     textin = isempty(args["bytes"]) ? textin : view(textin,args["bytes"],:)
-    
+
     # run SNR
     snrs = SNR(textin, traces)
 
